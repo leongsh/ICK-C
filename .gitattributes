@@ -1,0 +1,9 @@
+# 統一換行，避免 Windows/macOS 協作時產生整檔 diff
+* text=auto eol=lf
+
+# 二進位檔案
+*.png binary
+*.jpg binary
+*.gif binary
+*.pdf binary
+*.zip binary

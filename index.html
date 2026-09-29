@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>資訊科技知識 刷題復習系統</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<div id="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">🧭</span>
+      <div class="brand-txt">
+        <h1>資訊科技知識 刷題復習系統</h1>
+        <p>全澳中學生資訊科技知識問答比賽</p>
+      </div>
+    </div>
+    <nav class="topnav" id="topnav">
+      <button class="navbtn active" data-nav="home">首頁</button>
+      <button class="navbtn" data-nav="stats">學習統計</button>
+      <button class="navbtn" data-nav="wrong">錯題本</button>
+      <button class="navbtn hidden" data-nav="admin" id="navAdmin">管理員</button>
+      <span class="user-chip hidden" id="userChip">👤 <b id="userName">—</b></span>
+      <button class="navbtn hidden" id="btnUserLogout">登出</button>
+      <button class="navbtn icon-btn" id="themeToggle" title="切換主題">🌙</button>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ============ 使用者登入 ============ -->
+    <section id="view-login" class="view">
+      <div class="login-card card">
+        <div class="login-ico">🎓</div>
+        <h2>使用者登入</h2>
+        <p class="muted">請輸入管理員發放的帳號與密碼。</p>
+        <form id="userLoginForm">
+          <input type="text" id="loginUser" placeholder="帳號" autocomplete="username"
+                 autocapitalize="off" autocorrect="off" spellcheck="false">
+          <input type="password" id="loginPwd" placeholder="密碼" autocomplete="current-password">
+          <p class="login-err hidden" id="loginErr"></p>
+          <button class="btn primary full" type="submit">登入</button>
+        </form>
+        <p class="hint muted small">忘記密碼請洽管理員重設</p>
+      </div>
+    </section>
+
+    <!-- ============ 首頁 ============ -->
+    <section id="view-home" class="view active">
+      <div class="hero">
+        <div class="hero-main">
+          <h2>開始刷題</h2>
+          <p class="muted">選擇分類與練習模式，系統會依你的作答記錄安排復習。</p>
+        </div>
+        <div class="hero-stats" id="heroStats"></div>
+      </div>
+
+      <div class="section-head">
+        <h3>1. 選擇分類</h3>
+        <div class="section-tools">
+          <button class="btn tiny ghost" id="btnSelectAllCats">全選</button>
+          <button class="btn tiny ghost" id="btnClearCats">清除</button>
+        </div>
+      </div>
+      <div class="cat-grid" id="catGrid"></div>
+
+      <div class="section-head">
+        <h3>2. 練習模式</h3>
+      </div>
+      <div class="mode-grid" id="modeGrid">
+        <label class="mode-card" data-mode="order">
+          <input type="radio" name="mode" value="order" checked>
+          <span class="mode-ico">📑</span>
+          <span class="mode-name">順序練習</span>
+          <span class="mode-desc">每次重新抽題，抽中後依題號順序作答</span>
+        </label>
+        <label class="mode-card" data-mode="random">
+          <input type="radio" name="mode" value="random">
+          <span class="mode-ico">🎲</span>
+          <span class="mode-name">隨機練習</span>
+          <span class="mode-desc">隨機抽題，打亂順序鞏固記憶</span>
+        </label>
+        <label class="mode-card" data-mode="wrong">
+          <input type="radio" name="mode" value="wrong">
+          <span class="mode-ico">🔁</span>
+          <span class="mode-name">錯題重做</span>
+          <span class="mode-desc">只練曾答錯的題目，直到掌握</span>
+        </label>
+        <label class="mode-card" data-mode="exam">
+          <input type="radio" name="mode" value="exam">
+          <span class="mode-ico">⏱️</span>
+          <span class="mode-name">模擬考試</span>
+          <span class="mode-desc">限時作答，交卷後才顯示答案</span>
+        </label>
+      </div>
+
+      <div class="section-head">
+        <h3>3. 題目數量</h3>
+      </div>
+      <div class="opts-row" id="countRow">
+        <button class="chip-btn" data-count="10">10 題</button>
+        <button class="chip-btn active" data-count="20">20 題</button>
+        <button class="chip-btn" data-count="30">30 題</button>
+        <button class="chip-btn" data-count="50">50 題</button>
+        <button class="chip-btn" data-count="0">全部</button>
+        <span class="muted small" id="poolInfo"></span>
+      </div>
+      <div class="opts-row toggle-row">
+        <label class="toggle-inline"><input type="checkbox" id="optRedraw" checked> 每次重新抽題</label>
+        <label class="toggle-inline"><input type="checkbox" id="optShuffle" checked> 選項隨機排序</label>
+        <span class="muted small" id="redrawHint"></span>
+      </div>
+
+      <div class="start-bar">
+        <button class="btn primary big" id="btnStart">開始練習</button>
+      </div>
+    </section>
+
+    <!-- ============ 答題 ============ -->
+    <section id="view-quiz" class="view">
+      <div class="quiz-head">
+        <div class="quiz-meta">
+          <span class="chip" id="quizCat">—</span>
+          <span class="muted" id="quizProgressText">—</span>
+          <span class="timer hidden" id="quizTimer">00:00</span>
+        </div>
+        <button class="btn ghost small" id="btnQuit">結束練習</button>
+      </div>
+      <div class="progressbar"><div id="quizProgressBar" style="width:0%"></div></div>
+
+      <div class="card question-card">
+        <div class="q-top">
+          <span class="q-index" id="qIndex">第 1 題</span>
+          <span class="q-diff" id="qDiff"></span>
+          <button class="fav-btn" id="btnFav" title="收藏此題">☆</button>
+        </div>
+        <h2 class="q-text" id="qText"></h2>
+        <div class="options" id="qOptions"></div>
+        <div class="explain hidden" id="qExplain"></div>
+      </div>
+
+      <div class="quiz-foot">
+        <button class="btn ghost" id="btnPrev">← 上一題</button>
+        <span class="muted small" id="kbHint">快捷鍵：A / B / C / D 選答，Enter 下一題</span>
+        <button class="btn primary" id="btnNext">下一題 →</button>
+      </div>
+    </section>
+
+    <!-- ============ 結果 ============ -->
+    <section id="view-result" class="view">
+      <div class="result-hero">
+        <div class="score-ring" id="scoreRing">
+          <span class="score-num" id="scoreNum">0</span>
+          <span class="score-den" id="scoreDen">/0</span>
+        </div>
+        <div class="result-info">
+          <h2 id="resultTitle">練習完成</h2>
+          <p class="muted" id="resultSub"></p>
+          <div class="result-kpis" id="resultKpis"></div>
+        </div>
+      </div>
+      <div class="section-head"><h3>逐題回顧</h3></div>
+      <div id="reviewList" class="review-list"></div>
+      <div class="start-bar">
+        <button class="btn ghost" id="btnResultHome">返回首頁</button>
+        <button class="btn primary" id="btnRetryWrong">重做本次錯題</button>
+      </div>
+    </section>
+
+    <!-- ============ 學習統計 ============ -->
+    <section id="view-stats" class="view">
+      <div class="section-head"><h3>整體表現</h3>
+        <button class="btn tiny ghost" id="btnResetProgress">清除學習記錄</button>
+      </div>
+      <div class="kpi-grid" id="statsKpis"></div>
+      <div class="section-head"><h3>各分類掌握度</h3></div>
+      <div class="cat-stat-list" id="catStatList"></div>
+      <div class="section-head"><h3>最近練習記錄</h3></div>
+      <div class="history-list" id="historyList"></div>
+    </section>
+
+    <!-- ============ 錯題本 ============ -->
+    <section id="view-wrong" class="view">
+      <div class="section-head">
+        <h3>錯題本</h3>
+        <div class="section-tools">
+          <button class="btn tiny ghost" id="btnWrongPractice">重做全部錯題</button>
+          <button class="btn tiny ghost" id="btnWrongClear">清空錯題本</button>
+        </div>
+      </div>
+      <div id="wrongList" class="review-list"></div>
+    </section>
+
+    <!-- ============ 管理員登入 ============ -->
+    <section id="view-admin-login" class="view">
+      <div class="login-card card">
+        <div class="login-ico">🔐</div>
+        <h2>管理員登入</h2>
+        <p class="muted">登入後可新增、編輯、刪除題目，並匯入／匯出題庫。</p>
+        <form id="loginForm">
+          <input type="password" id="adminPwd" placeholder="請輸入管理員密碼" autocomplete="current-password">
+          <button class="btn primary full" type="submit">登入</button>
+        </form>
+        <p class="hint muted small hidden" id="loginHint">首次使用預設密碼：admin123（登入後請盡快修改）</p>
+      </div>
+    </section>
+
+    <!-- ============ 管理員後台 ============ -->
+    <section id="view-admin" class="view">
+      <div class="admin-head">
+        <div>
+          <h2>管理後台</h2>
+          <p class="muted small" id="adminMeta">—</p>
+        </div>
+        <div class="admin-actions">
+          <button class="btn ghost small" id="btnBackFront">回到前台</button>
+          <button class="btn ghost small" id="btnChangePwd">修改管理員密碼</button>
+          <button class="btn danger small" id="btnLogout">登出管理員</button>
+        </div>
+      </div>
+
+      <div class="tabs" id="adminTabs">
+        <button class="tab active" data-tab="bank">題庫管理</button>
+        <button class="tab" data-tab="users">帳號管理</button>
+      </div>
+
+      <!-- 題庫管理 -->
+      <div id="adminTabBank">
+        <div class="admin-tools">
+          <input type="search" id="adminSearch" placeholder="搜尋題目或解析關鍵字…">
+          <select id="adminCatFilter"></select>
+          <button class="btn primary small" id="btnNewQ">＋ 新增題目</button>
+          <button class="btn ghost small" id="btnBulk">批次新增</button>
+          <button class="btn ghost small" id="btnExport">匯出 JSON</button>
+          <button class="btn ghost small" id="btnImport">匯入 JSON</button>
+          <button class="btn ghost small" id="btnResetBank">還原預設題庫</button>
+          <input type="file" id="fileImport" accept=".json" hidden>
+        </div>
+        <div class="table-wrap">
+          <table class="qtable">
+            <thead>
+              <tr>
+                <th style="width:86px">編號</th>
+                <th style="width:110px">分類</th>
+                <th>題目</th>
+                <th style="width:70px">答案</th>
+                <th style="width:70px">難度</th>
+                <th style="width:130px">操作</th>
+              </tr>
+            </thead>
+            <tbody id="qTableBody"></tbody>
+          </table>
+        </div>
+        <p class="muted small" id="tableEmpty" hidden>沒有符合條件的題目。</p>
+      </div>
+
+      <!-- 帳號管理 -->
+      <div id="adminTabUsers" class="hidden">
+        <div class="admin-tools">
+          <input type="search" id="userSearch" placeholder="搜尋帳號或名稱…">
+          <button class="btn primary small" id="btnNewUser">＋ 新增帳號</button>
+          <button class="btn ghost small" id="btnExportUsers">匯出帳號密碼清單</button>
+        </div>
+        <div class="table-wrap">
+          <table class="qtable">
+            <thead>
+              <tr>
+                <th style="width:110px">帳號</th>
+                <th style="width:120px">名稱</th>
+                <th style="width:80px">狀態</th>
+                <th>練習進度</th>
+                <th style="width:110px">最後活動</th>
+                <th style="width:230px">操作</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody"></tbody>
+          </table>
+        </div>
+        <p class="muted small" id="userTableEmpty" hidden>沒有符合條件的帳號。</p>
+        <p class="muted small" style="margin-top:10px">
+          註：練習進度儲存在本機瀏覽器，同一台電腦的不同帳號各自獨立；換電腦不會同步。
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <span>資訊科技知識刷題復習系統 <span class="secret-entry" id="secretEntry">v1.0</span> · 題庫 <b id="footCount">0</b> 題</span>
+    <span class="muted">本機運行 · 資料儲存於瀏覽器</span>
+  </footer>
+</div>
+
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script src="assets/data/_index.js"></script>
+<script src="assets/data/accounts.js"></script>
+<script src="assets/data/net.js"></script>
+<script src="assets/data/hw.js"></script>
+<script src="assets/data/office.js"></script>
+<script src="assets/data/python.js"></script>
+<script src="assets/data/web.js"></script>
+<script src="assets/data/msc.js"></script>
+<script src="assets/data/daily.js"></script>
+<script src="assets/data/crime.js"></script>
+<script src="assets/data/china.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
