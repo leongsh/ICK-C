@@ -18,3 +18,6 @@ desktop.ini
 .vscode/
 .idea/
 *.swp
+
+# ---- 本機產生的分享素材（QR 碼、分享卡）----
+share/
